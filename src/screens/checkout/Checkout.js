@@ -5,7 +5,7 @@ import GridList from '@material-ui/core/GridList';
 import {GridListTile, Typography} from '@material-ui/core';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faCircle, faWeight} from '@fortawesome/free-solid-svg-icons';
+import {faCircle} from '@fortawesome/free-solid-svg-icons';
 import Stepper from '@material-ui/core/Stepper';
 import StepLabel from '@material-ui/core/StepLabel';
 import Step from '@material-ui/core/Step';
@@ -151,19 +151,17 @@ class Checkout extends Component {
             this.props.history.push('/');
         }
         else {
-            let resourcePath = "/address/customer";
-            let resourcePath1 = "/payment/";
-            let resourcePath2 = "/states/";
-        
-            
-           // let data = null;
+            let resourcePath = "/address/customer"; //Resource path for fetching address details of the customer
+            let resourcePath1 = "/payment/";        //Resource path for fetching payment methods details
+            let resourcePath2 = "/states/";         //Resource Path for fetching all state list 
+    
             let xhr = new XMLHttpRequest();
             let xhr1 = new XMLHttpRequest();
             let xhr2 = new XMLHttpRequest();
             
            
             let that = this;
-            console.log("baseurl : " + this.props.baseUrl + resourcePath);
+            //Logic to fetch addresses for a customer
             xhr.addEventListener("readystatechange", function () {
                 if (this.readyState === 4) {
                     that.setState({
@@ -176,6 +174,7 @@ class Checkout extends Component {
             xhr.setRequestHeader("authorization","Bearer " + sessionStorage.getItem("access-token"));
             xhr.send();
 
+            //Logic to fetch the avaiable payment methods 
             xhr1.addEventListener("readystatechange", function () {
                 if (this.readyState === 4) {
                     that.setState({
@@ -188,6 +187,7 @@ class Checkout extends Component {
             xhr1.setRequestHeader("authorization", "Bearer " + sessionStorage.getItem("access-token"));
             xhr1.send();
 
+            //Logic to fetch the states
             xhr2.addEventListener("readystatechange", function () {
                 if (this.readyState === 4) {
                     that.setState({
@@ -206,17 +206,15 @@ class Checkout extends Component {
 
     }
 
-     /*** Backend integration
-   */
+     /* Backend integration to save a new address*/
   saveAddress(datasaveAddress) {
 
     let resourcePath = "/address";
     let xhrSaveAddress = new XMLHttpRequest();
     let that = this;
-    //let data = null;
-
+    
     xhrSaveAddress.addEventListener("readystatechange", function () {
-        if (this.readyState === 4 && this.status == 201) {
+        if (this.readyState === 4 && this.status === 201) {
             that.setState({
                 registrationSuccess: true,
                 openSnackBar: true,
@@ -225,8 +223,7 @@ class Checkout extends Component {
                 successMessage: 'Added New Address successfully!'
             });
         } else {
-            that.setState({ errorResponse: this.responseText });
-            console.log(this.responseText);
+            that.setState({ errorResponse: this.responseText });            
         }
     });
 
@@ -240,7 +237,7 @@ class Checkout extends Component {
 
 saveAddressClickHandler = () => {
 
-            this.state.flat === "" ? this.setState({
+            this.state.flat_building_name === "" || this.state.flat_building_name === undefined ? this.setState({
                 incorrectDetails: "true",
                 flatRequired: "dispBlock"
             }) : this.setState({incorrectDetails: "false", flatRequired: "dispNone"});
@@ -252,18 +249,19 @@ saveAddressClickHandler = () => {
                 incorrectDetails: "true",
                 localityRequired: "dispBlock"
             }) : this.setState({incorrectDetails: "false", localityRequired: "dispNone"});
-            this.state.zipcode === "" ? this.setState({
+            this.state.pincode === "" || this.state.pincode === undefined ? this.setState({
                 incorrectDetails: "true",
                 zipcodeRequired: "dispBlock"
             }) : this.setState({incorrectDetails: "false", zipcodeRequired: "dispNone"});
-            if (this.state.zipcode !== "") {
-                if (this.state.zipcode.length === 6 && isNum(this.state.zipcode)) {
+            if (this.state.pincode !== "" && this.state.pincode !== undefined) {
+                if (this.state.pincode.length === 6 && isNum(this.state.pincode)) {
                     this.setState({incorrectDetails: "false", incorrectZipcode: "dispNone"})
                 }
                 else {
                     this.setState({incorrectDetails: "true", incorrectZipcode: "dispBlock"})
                 }
             }
+            
             if (this.state.incorrectDetails === "false") 
 			{
                let dataSaveAddress =
@@ -275,9 +273,7 @@ saveAddressClickHandler = () => {
                         "state_uuid": this.state.stateId
                         });
                 this.saveAddress(dataSaveAddress);
-            }			
-
-        
+            }	       
    
 };
 
@@ -293,7 +289,7 @@ saveAddressClickHandler = () => {
     handleNext = () => {
         if (this.state.tabValue === 1) {
 
-            this.state.flat === "" ? this.setState({
+            this.state.flat_building_name === "" || this.state.flat_building_name === undefined ? this.setState({
                 incorrectDetails: "true",
                 flatRequired: "dispBlock"
             }) : this.setState({incorrectDetails: "false", flatRequired: "dispNone"});
@@ -305,12 +301,12 @@ saveAddressClickHandler = () => {
                 incorrectDetails: "true",
                 localityRequired: "dispBlock"
             }) : this.setState({incorrectDetails: "false", localityRequired: "dispNone"});
-            this.state.zipcode === "" ? this.setState({
+            this.state.pincode === "" || this.state.pincode === undefined ? this.setState({
                 incorrectDetails: "true",
                 zipcodeRequired: "dispBlock"
             }) : this.setState({incorrectDetails: "false", zipcodeRequired: "dispNone"});
-            if (this.state.zipcode !== "") {
-                if (this.state.zipcode.length === 6 && isNum(this.state.zipcode)) {
+            if (this.state.pincode !== "" && this.state.pincode !== undefined) {
+                if (this.state.pincode.length === 6 && isNum(this.state.pincode)) {
                     this.setState({incorrectDetails: "false", incorrectZipcode: "dispNone"})
                 }
                 else {
@@ -362,8 +358,7 @@ saveAddressClickHandler = () => {
         });
     };
 
-    paymentHandleChange = event => {
-        console.log("Payment Handler")
+    paymentHandleChange = event => {       
         this.setState({paymentId: event.target.value});
     };
 
@@ -428,18 +423,8 @@ saveAddressClickHandler = () => {
                 orderNotificationMessage: "Unable to place your order! Please try again!"
             });
             return;
-        }
-        /*else if (this.props.location.restaurant_id === undefined) {
-            that.setState({
-                open: true,
-                orderNotificationMessage: "Unable to place your order! Please try again!"
-            });
-            return;
-        }*/
-        
-        else {
-            console.log('Testing');
-           console.log(this.props.location.cartItems); 
+        }        
+        else {            
             this.props.location.cartItems.map(item => {
                 this.state.cartItems.push({
                     "item_id": item.id,
@@ -447,9 +432,7 @@ saveAddressClickHandler = () => {
                     "price" : item.price,
                     "type" : item.item_type
                 });
-            });
-
-          // itemQuantities = JSON.stringify(this.state.cartItems);
+            });          
         }
         if (address.length === 0) {
             that.setState({
@@ -480,10 +463,7 @@ saveAddressClickHandler = () => {
                 "item_quantities" : this.state.cartItems
                });
 
-        }
-        
-       
-    
+        }   
 
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
@@ -511,9 +491,7 @@ saveAddressClickHandler = () => {
         const {classes} = this.props;
         const steps = getSteps();
         const {activeStep} = this.state;
-        const {cartItems, totalCartValue} = this.props.location;
-        console.log('Testing');
-        console.log(cartItems);
+        const {cartItems, totalCartValue} = this.props.location;        
         return (
             <div className="checkout">
                 <Header {...this.props} isHomePage={false}/>
@@ -646,7 +624,7 @@ saveAddressClickHandler = () => {
                                                         </FormHelperText>
                                                     </FormControl>
                                                     <br/><br/>
-                                                    <Button variant="contained" className="button-saveAddress"
+                                                    <Button variant="contained" style={{color:'white',backgroundColor:'#f50057',width : '20%'}}
                                                         onClick={this.saveAddressClickHandler}>
                                                         SAVE ADDRESS
                                                     </Button>
@@ -719,7 +697,7 @@ saveAddressClickHandler = () => {
                                             gutterBottom variant="h5" component="h2">
                                     Summary
                                 </Typography>
-                                <div className="div-container div-items" style={{marginLeft: '40px', fontSize : '110%',color:'grey' }}>{this.props.location.restaurant_name} </div>
+                                <div className="div-container div-items" style={{fontSize : '110%',color:'grey' }}>{this.props.location.restaurant_name} </div>
                                 {cartItems !== undefined && cartItems.map(item => (
                                     <div className="order-body-container" key={"item" + item.id}>
                                         <div className="div-container div-items">{item.item_type === 'VEG' &&
@@ -741,7 +719,7 @@ saveAddressClickHandler = () => {
                                         icon="rupee-sign"/> {totalCartValue}</span>
                                 </div>
                                 <br/>
-                                <Button className="button-container" style={{marginLeft: '55px'}} variant="contained"
+                                <Button className="button-container" style={{marginLeft: '35px',width : '80%',textAlign:'center'}} variant="contained"
                                         onClick={this.confirmOrderHandler} color="primary">
                                     Place Order
                                 </Button>
