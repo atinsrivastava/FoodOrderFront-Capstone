@@ -42,3 +42,15 @@
 .red {
   color: red;
 }
+.my-account-dropdown-menu-item,
+.logout-dropdown-menu-item {
+  text-decoration: none;
+  color: #000;
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 768px) {
+  .login-button {
+    float: right;
+  }
+}
